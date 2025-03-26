@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Side Project Graveyard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Boldonse&family=Hubot+Sans:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --accent: #404040;
+            --secondary: #808080;
+            --border: #e0e0e0;
+            --grave-bg: rgba(255, 255, 255, 0.85);
+            --modal-bg: rgba(255, 255, 255, 0.95);
+            --button-bg: rgba(0, 0, 0, 0.8);
+            --button-text: white;
+            --delete-color: #e53935;
+            --edit-color: #4285f4;
+            --zombie-color: #2e7d32;
+            --suggest-color: #7b1fa2;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Hubot Sans', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 0 1rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #000000, #505050);
+            -webkit-background-clip: text;
+            font-family: 'boldonse', monospace;
+            letter-spacing: -1px;
+            font-weight: 100;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.7;
+        }
+
+        .add-project {
+            display: block;
+            margin: 1rem auto;
+            padding: 0.8rem 1.5rem;
+            background: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-weight: 500;
+        }
+
+        .add-project:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .graveyard {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .grave {
+            background: var(--grave-bg);
+            border-radius: 16px;
+            padding: 1.75rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .grave:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .grave::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #000, #505050);
+        }
+
+        .grave-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+
+        .project-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            word-break: break-word;
+            flex: 1;
+        }
+
+        .grave-controls {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .control-btn {
+            background: transparent;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: var(--secondary);
+        }
+
+        .control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .edit-btn:hover {
+            color: var(--edit-color);
+        }
+
+        .delete-btn:hover {
+            color: var(--delete-color);
+        }
+
+        .death-date {
+            opacity: 0.7;
+            font-style: italic;
+            font-size: 0.95rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .cause-of-death {
+            background: rgba(0, 0, 0, 0.05);
+            border-left: 3px solid rgba(0, 0, 0, 0.2);
+            padding: 0.85rem;
+            margin: 1.2rem 0;
+            font-weight: 500;
+        }
+
+        .last-words {
+            margin-top: 1.2rem;
+            padding: 0.85rem;
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 8px;
+            font-style: italic;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.6rem 0.25rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            color: white;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            gap: 0.4rem;
+            min-width: 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-icon {
+            font-size: 1rem;
+        }
+
+        .btn-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-zombie {
+            background: var(--zombie-color);
+        }
+
+        .btn-zombie:hover {
+            background: #43a047;
+        }
+
+        .btn-suggest {
+            background: var(--suggest-color);
+        }
+
+        .btn-suggest:hover {
+            background: #9c27b0;
+        }
+
+        .btn-export {
+            background: #424242;
+        }
+
+        .btn-export:hover {
+            background: #616161;
+        }
+
+        .btn-delete {
+            background: var(--delete-color);
+        }
+
+        .btn-delete:hover {
+            background: #f44336;
+        }
+
+        .btn-confirm {
+            background: #2196f3;
+        }
+
+        .btn-confirm:hover {
+            background: #42a5f5;
+        }
+
+        .btn-cancel {
+            background: #757575;
+        }
+
+        .btn-cancel:hover {
+            background: #9e9e9e;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--modal-bg);
+            width: 90%;
+            max-width: 600px;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal h3 {
+            margin-bottom: 1.75rem;
+            color: var(--accent);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.85rem;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-color);
+            border-radius: 8px;
+            font-family: 'Hubot Sans', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .form-tip {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 0.4rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            margin: 4rem 0;
+            opacity: 0.6;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .project-count {
+            text-align: center;
+            font-size: 1rem;
+            opacity: 0.6;
+            margin-top: 0.5rem;
+        }
+
+        .confirm-text {
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .confirm-project {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Zombie animation */
+        @keyframes zombieGlow {
+            0% { background: rgba(46, 125, 50, 0.3); }
+            50% { background: rgba(46, 125, 50, 0.6); }
+            100% { background: rgba(46, 125, 50, 0.3); }
+        }
+
+        .zombie-glow {
+            animation: zombieGlow 2s infinite;
+        }
+
+        /* For mobile devices */
+        @media (max-width: 768px) {
+            .graveyard {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions {
+                flex-wrap: wrap;
+            }
+            
+            .btn {
+                flex: 1 0 45%;
+                padding: 0.75rem 0.5rem;
+            }
+        }
+
+        /* Tooltip styles */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Side Project Graveyard</h1>
+            <p class="subtitle">A beautiful cemetery for all your dead ideas 😵‍💫 💥</p>
+            <button class="add-project" id="addProjectBtn">
+                <i class="fas fa-plus" style="margin-right: 0.5rem;"></i> Add Dead Project
+            </button>
+            <p class="project-count" id="projectCount"></p>
+        </header>
+
+        <div class="graveyard" id="graveyard">
+            <!-- Empty state -->
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">⚰️</div>
+                <p>No dead projects yet. Time to bury some ideas!</p>
+            </div>
+            <!-- Projects will appear here -->
+        </div>
+    </div>
+
+    <!-- Add/Edit Project Modal -->
+    <div class="modal" id="addEditModal">
+        <div class="modal-content fade-in">
+            <h3 id="modalTitle">Bury a Project</h3>
+            <form id="projectForm">
+                <div class="form-group">
+                    <label for="projectName">Project Name</label>
+                    <input type="text" id="projectName" required placeholder="e.g., Notion AI Calendar">
+                </div>
+                <div class="form-group">
+                    <label for="causeOfDeath">Cause of Death</label>
+                    <textarea id="causeOfDeath" required placeholder="e.g., Lost interest, found a better alternative, etc."></textarea>
+                    <p class="form-tip">Be creative and honest about why this project died</p>
+                </div>
+                <div class="form-group">
+                    <label for="deathDate">Date of Death</label>
+                    <input type="date" id="deathDate">
+                    <div style="margin-top:0.75rem;">
+                        <label for="autoDeath" style="display:flex; align-items:center; font-weight:normal;">
+                            <input type="checkbox" id="autoDeath" style="width:auto; margin-right:0.5rem;">
+                            Generate fun death date
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="lastWords">Last Words</label>
+                    <textarea id="lastWords" rows="3" placeholder="e.g., Just needed a landing page and motivation"></textarea>
+                </div>
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-cancel" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-confirm" id="submitBtn">Bury It</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content fade-in">
+            <h3>Confirm Deletion</h3>
+            <p class="confirm-text">Are you sure you want to permanently delete this project from the graveyard?</p>
+            <div class="confirm-project" id="deleteProjectName"></div>
+            <p>This action cannot be undone.</p>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-cancel" id="cancelDelete">Cancel</button>
+                <button type="button" class="btn btn-delete" id="confirmDelete">Delete Forever</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Zombie Mode Modal -->
+    <div class="modal" id="zombieModal">
+        <div class="modal-content fade-in">
+            <h3><i class="fas fa-brain" style="margin-right: 0.5rem;"></i> Zombie Mode</h3>
+            <p class="confirm-text">Are you sure you want to bring this project back from the dead?</p>
+            <div class="confirm-project" id="zombieProjectName"></div>
+            <p>This is a big responsibility. Undead projects require more attention than regular ones.</p>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-cancel" id="cancelZombie">Let it rest</button>
+                <button type="button" class="btn btn-zombie" id="confirmZombie">Resurrect it!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suggest Project Modal -->
+    <div class="modal" id="suggestModal">
+        <div class="modal-content fade-in">
+            <h3><i class="fas fa-lightbulb" style="margin-right: 0.5rem;"></i> Build This Instead</h3>
+            <div id="suggestion"></div>
+            <div class="form-buttons">
+                <button type="button" class="btn btn-cancel" id="closeSuggest">Close</button>
+                <button type="button" class="btn btn-suggest" id="getNewSuggestion">Different Idea</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample death date generators
+        const deathDateGenerators = [
+            "died 3 hours after registering the domain",
+            "abandoned before the git init",
+            "lasted only 2 sprints",
+            "died during the design phase",
+            "lived for 1 weekend hackathon",
+            "survived 4 commits",
+            "made it to the README.md and nothing more",
+            "never survived the coffee break",
+            "lasted 1 Pomodoro timer",
+            "died after the first Stack Overflow search",
+            "died in the shower when a better idea came",
+            "expired on the whiteboard sketch",
+            "abandoned after generating the logo",
+            "lasted until I estimated the hosting costs",
+            "only survived one design review"
+        ];
+
+        // In-memory storage instead of localStorage
+        let projects = [];
+        let currentProjectId = null;
+
+        // DOM elements
+        const addEditModal = document.getElementById('addEditModal');
+        const deleteModal = document.getElementById('deleteModal');
+        const zombieModal = document.getElementById('zombieModal');
+        const suggestModal = document.getElementById('suggestModal');
+        const addProjectBtn = document.getElementById('addProjectBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const projectForm = document.getElementById('projectForm');
+        const autoDeathCheck = document.getElementById('autoDeath');
+        const deathDateInput = document.getElementById('deathDate');
+        const graveyard = document.getElementById('graveyard');
+        const emptyState = document.getElementById('emptyState');
+        const projectCount = document.getElementById('projectCount');
+        const modalTitle = document.getElementById('modalTitle');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
+        const deleteProjectName = document.getElementById('deleteProjectName');
+        const cancelZombie = document.getElementById('cancelZombie');
+        const confirmZombie = document.getElementById('confirmZombie');
+        const zombieProjectName = document.getElementById('zombieProjectName');
+        const closeSuggest = document.getElementById('closeSuggest');
+        const getNewSuggestion = document.getElementById('getNewSuggestion');
+        const suggestion = document.getElementById('suggestion');
+
+        // Add some sample projects for demonstration
+        function addSampleProjects() {
+            projects = [
+                {
+                    id: 1,
+                    name: "Notion AI Calendar",
+                    causeOfDeath: "Lost interest after discovering the complexity of calendar syncing APIs",
+                    deathDate: "died 3 hours after registering the domain",
+                    lastWords: "Just needed a landing page and motivation",
+                    createdAt: Date.now() - 1000000
+                },
+                {
+                    id: 2,
+                    name: "React Weather App",
+                    causeOfDeath: "Discovered it already exists - there are 1000+ weather apps on the app store",
+                    deathDate: "never survived the coffee break",
+                    lastWords: "Why reinvent the rain?",
+                    createdAt: Date.now() - 500000
+                },
+                {
+                    id: 3,
+                    name: "AI Writing Assistant",
+                    causeOfDeath: "OpenAI released a better version a week after I started",
+                    deathDate: "lasted until I saw the competition",
+                    lastWords: "Defeated by corporate R&D budgets",
+                    createdAt: Date.now() - 250000
+                }
+            ];
+            renderProjects();
+        }
+
+        // Event listeners
+        addProjectBtn.addEventListener('click', () => {
+            openAddEditModal();
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            addEditModal.style.display = 'none';
+        });
+
+        cancelDelete.addEventListener('click', () => {
+            deleteModal.style.display = 'none';
+        });
+
+        cancelZombie.addEventListener('click', () => {
+            zombieModal.style.display = 'none';
+        });
+
+        closeSuggest.addEventListener('click', () => {
+            suggestModal.style.display = 'none';
+        });
+
+        autoDeathCheck.addEventListener('change', () => {
+            deathDateInput.disabled = autoDeathCheck.checked;
+        });
+
+        // Open Add/Edit modal
+        function openAddEditModal(projectId = null) {
+            currentProjectId = projectId;
+            projectForm.reset();
+            
+            if (projectId) {
+                const project = projects.find(p => p.id === projectId);
+                if (project) {
+                    document.getElementById('projectName').value = project.name;
+                    document.getElementById('causeOfDeath').value = project.causeOfDeath;
+                    document.getElementById('lastWords').value = project.lastWords || '';
+                    
+                    // Handle date format for the date input
+                    if (project.deathDate && !deathDateGenerators.includes(project.deathDate)) {
+                        try {
+                            // Try to parse the date - this is a simplified approach
+                            const dateObj = new Date(project.deathDate);
+                            if (!isNaN(dateObj)) {
+                                const year = dateObj.getFullYear();
+                                const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                                const day = String(dateObj.getDate()).padStart(2, '0');
+                                document.getElementById('deathDate').value = `${year}-${month}-${day}`;
+                                autoDeathCheck.checked = false;
+                            } else {
+                                autoDeathCheck.checked = true;
+                                deathDateInput.disabled = true;
+                            }
+                        } catch (e) {
+                            autoDeathCheck.checked = true;
+                            deathDateInput.disabled = true;
+                        }
+                    } else {
+                        autoDeathCheck.checked = true;
+                        deathDateInput.disabled = true;
+                    }
+                    
+                    modalTitle.textContent = 'Edit Project';
+                    submitBtn.textContent = 'Update Project';
+                }
+            } else {
+                modalTitle.textContent = 'Bury a Project';
+                submitBtn.textContent = 'Bury It';
+            }
+            
+            addEditModal.style.display = 'flex';
+        }
+
+        // Submit form handler
+        projectForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const causeOfDeath = document.getElementById('causeOfDeath').value;
+            
+            let deathDate;
+            if(autoDeathCheck.checked) {
+                deathDate = deathDateGenerators[Math.floor(Math.random() * deathDateGenerators.length)];
+            } else if (deathDateInput.value) {
+                const date = new Date(deathDateInput.value);
+                deathDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            } else {
+                deathDate = "died under mysterious circumstances";
+            }
+            
+            const newProject = {
+                id: currentProjectId || Date.now(),
+                name: document.getElementById('projectName').value,
+                causeOfDeath: causeOfDeath,
+                deathDate: deathDate,
+                lastWords: document.getElementById('lastWords').value,
+                createdAt: currentProjectId ? (projects.find(p => p.id === currentProjectId)?.createdAt || Date.now()) : Date.now()
+            };
+            
+            if(currentProjectId) {
+                // Update existing project
+                projects = projects.map(p => p.id === currentProjectId ? newProject : p);
+            } else {
+                // Add new project
+                projects.push(newProject);
+            }
+            
+            renderProjects();
+            addEditModal.style.display = 'none';
+        });
+
+        confirmDelete.addEventListener('click', () => {
+            if(currentProjectId) {
+                projects = projects.filter(p => p.id !== currentProjectId);
+                renderProjects();
+            }
+            deleteModal.style.display = 'none';
+        });
+
+        confirmZombie.addEventListener('click', () => {
+            if(currentProjectId) {
+                const project = projects.find(p => p.id === currentProjectId);
+                if(project) {
+                    const grave = document.getElementById(`grave-${project.id}`);
+                    if (grave) {
+                        grave.classList.add('zombie-glow');
+                        grave.querySelector('.headstone').innerHTML = '<i class="fas fa-brain"></i>';
+                        
+                        setTimeout(() => {
+                            grave.classList.remove('zombie-glow');
+                            grave.querySelector('.headstone').innerHTML = '<i class="fas fa-tombstone"></i>';
+                        }, 3000);
+                    }
+                }
+            }
+            zombieModal.style.display = 'none';
+        });
+
+        getNewSuggestion.addEventListener('click', () => {
+            renderSuggestion();
+        });
+
+        // Delete project
+        function deleteProject(projectId) {
+            currentProjectId = projectId;
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+                deleteProjectName.textContent = project.name;
+                deleteModal.style.display = 'flex';
+            }
+        }
+
+        // Zombie mode
+        function zombieMode(projectId) {
+            currentProjectId = projectId;
+            const project = projects.find(p => p.id === projectId);
+            if (project) {
+                zombieProjectName.textContent = project.name;
+                zombieModal.style.display = 'flex';
+            }
+        }
+
+        // Render all projects
+        function renderProjects() {
+            if(projects.length === 0) {
+                emptyState.style.display = 'block';
+                projectCount.textContent = '';
+            } else {
+                emptyState.style.display = 'none';
+                projectCount.textContent = `${projects.length} project${projects.length !== 1 ? 's' : ''} in the graveyard`;
+                
+                graveyard.innerHTML = '';
+                projects.forEach(project => {
+                    const grave = createGraveElement(project);
+                    graveyard.appendChild(grave);
+                });
+            }
+        }
+
+        // Create a grave element
+        function createGraveElement(project) {
+            const grave = document.createElement('div');
+            grave.className = 'grave fade-in';
+            grave.id = `grave-${project.id}`;
+            
+            // Check if Font Awesome is loaded correctly
+            const headstoneIcon = typeof FontAwesome !== 'undefined' ? 
+                '<i class="fas fa-tombstone"></i>' : 
+                (typeof window.FontAwesome !== 'undefined' ? 
+                    '<i class="fas fa-tombstone"></i>' : '🪦');
+            
+            grave.innerHTML = `
+                <div class="grave-header">
+                    <div class="project-name">${project.name}</div>
+                    <div class="grave-controls">
+                        <button class="control-btn edit-btn" data-id="${project.id}" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="control-btn delete-btn" data-id="${project.id}" title="Delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="death-date">${project.deathDate}</div>
+                <div class="cause-of-death">${project.causeOfDeath}</div>
+                <div class="last-words">
+                    <strong>Last Words:</strong> "${project.lastWords || 'No last words were recorded...'}"
+                </div>
+                <div class="actions">
+                    <button class="btn btn-zombie zombie-btn" data-id="${project.id}">
+                        <i class="fas fa-brain btn-icon"></i>
+                        <span class="btn-text">Resurrect</span>
+                    </button>
+                    <button class="btn btn-suggest suggest-btn" data-id="${project.id}">
+                        <i class="fas fa-lightbulb btn-icon"></i>
+                        <span class="btn-text">New Idea</span>
+                    </button>
+                    <button class="btn btn-export export-btn" data-id="${project.id}">
+                        <i class="fas fa-share-alt btn-icon"></i>
+                        <span class="btn-text">Share</span>
+                    </button>
+                </div>
+            `;
+            
+            // Add event listeners to the newly created grave element
+            grave.querySelector('.edit-btn').addEventListener('click', () => {
+                openAddEditModal(project.id);
+            });
+            
+            grave.querySelector('.delete-btn').addEventListener('click', () => {
+                deleteProject(project.id);
+            });
+            
+            grave.querySelector('.zombie-btn').addEventListener('click', () => {
+                zombieMode(project.id);
+            });
+            
+            grave.querySelector('.suggest-btn').addEventListener('click', () => {
+                currentProjectId = project.id;
+                openSuggestModal(project);
+            });
+            
+            grave.querySelector('.export-btn').addEventListener('click', () => {
+                shareProject(project);
+            });
+            
+            return grave;
+        }
+
+        // Project suggestion feature
+        function openSuggestModal(project) {
+            suggestModal.style.display = 'flex';
+            renderSuggestion(project);
+        }
+        
+        function renderSuggestion(project) {
+            const projectIdeas = [
+                {
+                    title: "A Smaller Version",
+                    description: "Scale down the ambition and make a tiny, focused version that solves just one specific problem."
+                },
+                {
+                    title: "An Open Source Tool",
+                    description: "Transform your idea into a community-driven open-source project that others can contribute to."
+                },
+                {
+                    title: "A Chrome Extension",
+                    description: "Make it a simple browser extension that adds just one killer feature to websites."
+                },
+                {
+                    title: "A Mobile App",
+                    description: "Mobile first! Design a simplified version that works great on phones and solves a specific problem."
+                },
+                {
+                    title: "A Newsletter",
+                    description: "Create content about the topic instead of building software. Start with a newsletter to build an audience."
+                },
+                {
+                    title: "A Weekend Project",
+                    description: "Set a strict 48-hour deadline. Build only what you can complete in a weekend."
+                },
+                {
+                    title: "A CLI Tool",
+                    description: "Build a command-line interface tool that developers would love to use."
+                },
+                {
+                    title: "A Telegram/Discord Bot",
+                    description: "Create a simple bot that brings the core functionality to where people already are."
+                },
+                {
+                    title: "An AI-Powered Version",
+                    description: "Leverage GPT or other AI tools to do the heavy lifting and make implementation easier."
+                },
+                {
+                    title: "A Figma Plugin",
+                    description: "Create a tool for designers that makes their workflow better or more efficient."
+                }
+            ];
+            
+            const randomIdea = projectIdeas[Math.floor(Math.random() * projectIdeas.length)];
+            
+            suggestion.innerHTML = `
+                <p class="confirm-text">Instead of ${project ? project.name : 'your original idea'}, why not try:</p>
+                <div class="confirm-project">
+                    <h3>${randomIdea.title}</h3>
+                    <p>${randomIdea.description}</p>
+                </div>
+                <p style="margin-top: 1.5rem;">Sometimes the best projects are the ones with a smaller scope!</p>
+            `;
+        }
+
+        // Share project functionality
+        function shareProject(project) {
+            // Create a shareable text
+            const text = `RIP: ${project.name}\n${project.deathDate}\nCause of death: ${project.causeOfDeath}\nLast words: "${project.lastWords || 'No last words were recorded...'}"\n\n#SideProjectGraveyard`;
+            
+            // Try to use the clipboard API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        alert('Project details copied to clipboard!');
+                    })
+                    .catch(() => {
+                        // Fallback
+                        prompt('Copy this text to share your dead project:', text);
+                    });
+            } else {
+                // Fallback for browsers without clipboard API
+                prompt('Copy this text to share your dead project:', text);
+            }
+        }
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === addEditModal) {
+                addEditModal.style.display = 'none';
+            }
+            if (e.target === deleteModal) {
+                deleteModal.style.display = 'none';
+            }
+            if (e.target === zombieModal) {
+                zombieModal.style.display = 'none';
+            }
+            if (e.target === suggestModal) {
+                suggestModal.style.display = 'none';
+            }
+        });
+
+        // Load projects on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Check for existing projects in localStorage
+            const savedProjects = localStorage.getItem('sideProjectGraveyard');
+            if (savedProjects) {
+                try {
+                    projects = JSON.parse(savedProjects);
+                    renderProjects();
+                } catch (e) {
+                    console.error('Error loading saved projects', e);
+                    addSampleProjects();
+                }
+            } else {
+                // Load sample projects for demonstration
+                addSampleProjects();
+            }
+        });
+
+        // Save projects when they change
+        function saveProjects() {
+            try {
+                localStorage.setItem('sideProjectGraveyard', JSON.stringify(projects));
+            } catch (e) {
+                console.error('Error saving projects', e);
+            }
+        }
+
+        // Add a MutationObserver to watch for changes to the projects array
+        const projectsObserver = new MutationObserver(() => {
+            saveProjects();
+        });
+
+        // Save projects whenever they're modified
+        const originalPush = Array.prototype.push;
+        Array.prototype.push = function(...args) {
+            const result = originalPush.apply(this, args);
+            if (this === projects) {
+                saveProjects();
+            }
+            return result;
+        };
+
+        // Add a function to export all projects as JSON
+        function exportProjects() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "side-project-graveyard.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        // Add a function to import projects from JSON
+        function importProjects(jsonString) {
+            try {
+                const importedProjects = JSON.parse(jsonString);
+                if (Array.isArray(importedProjects)) {
+                    projects = importedProjects;
+                    renderProjects();
+                    saveProjects();
+                    return true;
+                }
+            } catch (e) {
+                console.error('Error importing projects', e);
+            }
+            return false;
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Escape key closes any open modal
+            if (e.key === 'Escape') {
+                addEditModal.style.display = 'none';
+                deleteModal.style.display = 'none';
+                zombieModal.style.display = 'none';
+                suggestModal.style.display = 'none';
+            }
+            
+            // Ctrl+N or Cmd+N for new project
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                openAddEditModal();
+            }
+        });
+
+        // Add dark mode toggle
+        function toggleDarkMode() {
+            const root = document.documentElement;
+            
+            if (root.classList.contains('dark-mode')) {
+                root.classList.remove('dark-mode');
+                localStorage.setItem('darkMode', 'false');
+            } else {
+                root.classList.add('dark-mode');
+                localStorage.setItem('darkMode', 'true');
+            }
+        }
+
+        // Check for dark mode preference
+        function checkDarkMode() {
+            const darkModePreference = localStorage.getItem('darkMode');
+            if (darkModePreference === 'true' || 
+                (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && darkModePreference !== 'false')) {
+                document.documentElement.classList.add('dark-mode');
+            }
+        }
+
+        // Call on page load
+        checkDarkMode();
+    </script>
+</body>
+</html>
